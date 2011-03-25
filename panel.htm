@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>ISY Panel</title>
+	<link rel="stylesheet" type="text/css" href="./panel.css" />
+	<link rel="icon" type="image/png" href="favicon.png">
+	<!-- link rel="shortcut icon" type="image/x-icon" href="favicon.ico" /-->
+	<script type="text/javascript" src="./jquery.js"></script>
+	<script type="text/javascript" src="./config.js"></script>
+</head>
+<body>
+	<div id="wrapper">
+		<div id="frameMenu">
+			<div>
+				<button id="btnHome"     onClick="ISYPanel.loadControls();">Home</button> 
+				<button id="btnDevices"  onClick="ISYPanel.loadDevices();">Devices</button> 
+				<button id="btnScenes"   onClick="ISYPanel.loadScenes();">Scenes</button> 
+				<button id="btnPrograms" onClick="ISYPanel.loadPgms();">Programs</button>
+			</div>
+		</div>
+
+		<div id="frameCameras">
+			<div id="camControls">
+				<input type="checkbox" id="chkPollCameras" onClick="ISYPanel.chkPollCameras_CheckEventHandler()" /> 
+				<label for="chkPollCameras"> Poll cameras every </label>
+				<select id="selPollTimeout">
+					<option value="300000">5 minutes</option>
+					<option value="60000">1 minute</option>
+					<option value="10000">10 seconds</option>
+					<option value="5000">5 seconds</option>
+				</select>
+			</div>
+			
+			<div id="camContainer"></div>
+		</div>
+
+		<div id="frameControl">
+			<div id="ctrlContainer"></div>
+		</div>
+
+		<div id="frameStatus">
+			<div id="logControls">
+				<input id="chkEnableLog" type="checkbox" /><label for="chkEnableLog">Enable log</label>
+				<button id="btnClearLog" onClick="ISYPanel.ClearLog()">Clear log</button>
+				<button id="btnExpandLog" onClick="ISYPanel.ExpandLog()">+</button>
+			</div>
+			<div id="statusContainer"></div>
+		</div>
+	</div>
+	<script type="text/javascript" src="./main.js"></script>
+</body>
+</html>

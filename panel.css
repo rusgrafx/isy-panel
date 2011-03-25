@@ -1,0 +1,137 @@
+/* panel.css */
+
+HTML, BODY, DIV, IFRAME, LABEL, SELECT, OPTION {
+	margin: 0px;
+	padding: 0px;
+	border: none;
+	font-family: "Segoe UI", Verdana, Arial, serif;
+	/*background-color: black;*/
+	color: silver;
+}
+#frameMenu {
+	/*background-color: gold;*/
+	vertical-align: middle;
+	border-bottom: 3px groove gray;
+	padding: 1em 4px;
+}
+#frameControl {
+	/*margin-right: 330px;*/
+	/*background-color: black;*/
+	padding: 4px;
+}
+#frameCameras {
+	float: right;
+	width: 324px;
+	height: auto;
+}
+#frameStatus {
+	clear: both;
+	position: relative;
+	border-top: 3px groove gray;
+	border-bottom: 3px groove gray;
+	padding: 4px;
+	/*background-color: green;*/
+}
+
+/* MENU */
+#frameMenu BUTTON {
+	height: 3em;
+	background-color: transparent;
+	color: silver;
+	border-radius: 1em;
+}
+
+/* CAMERA */
+#frameCameras #camControls {
+	margin: 4px;
+	/*background-color: black;*/
+}
+#frameCameras .boxCamImage {
+	background-color: white;
+	padding: 2px;
+	margin-bottom: 6px;
+}
+#frameCameras .camLabel {
+	text-align: center;
+	vertical-align: middle;
+	color: darkslateblue;
+	background-color: white;
+	font-family: "Apple Chancery", Taffy, cursive;
+	font-size: 1.4em;
+	/*font-weight: bold;
+	font-style: italic;*/
+}
+#frameCameras IMG {
+	border: none;
+	width: 320px;
+	height: 240px;
+}
+#frameCameras LABEL {
+	color: silver;
+}
+#frameCameras SELECT,
+#frameCameras OPTION {
+	margin: 4px;
+	background-color: #191C30;
+	color: silver;
+}
+
+/* CONTROLS */
+#frameControl iframe, #frameControl  A, #frameControl A:hover, #frameControl A:visited {
+	color: silver;
+	text-decoration: none;
+}
+#frameControl BUTTON {
+	width: 3em;
+	height: 3em;
+	background-color: transparent;
+	color: silver;
+	border-radius: 2em;
+	margin: 2px;
+}
+#frameControl FIELDSET {
+	border: 2px solid dimgray;
+	float: left;
+	border-radius: 8px;
+	margin-right: 1em;
+	margin-bottom: 1em;
+	font-weight: bold;
+}
+#frameControl .areaName {
+	min-width: 100px;
+	text-shadow: 2px 2px 2px black;
+	font-style: italic;
+	font-weight: bold;
+}
+#frameControl .areaCtrl {
+	
+}
+#frameControl LEGEND {
+	text-transform: uppercase;
+}
+
+/* FOOTER / LOG */
+#frameStatus #statusContainer {
+	padding-left: .5em;
+	height: 50px;
+	border: 1px groove gray;
+	font-size: 90%;
+	font-family: Terminal, Courier, monospace;
+	overflow-y: auto;
+}
+#frameStatus BUTTON {
+	background-color: transparent;
+	color: silver;
+	border-radius: 5px;
+	height: 2em;
+}
+#frameStatus #logControls {
+	float: left;
+	/*height: 50px;*/
+	width: 110px;
+	margin: 0 1em;
+}
+#frameStatus #btnExpandLog {
+	width: 2em;
+	border-radius: 1em;
+}

@@ -1,0 +1,16 @@
+/* Stylesheet for panel 'Kitchen' */
+/* Background images credit: http://www.grsites.com */
+
+BODY {
+	background-image: url(./backgr02.jpg);
+}
+BUTTON {
+	font-family: "Segoe UI", Verdana, Arial, serif;
+	opacity: 0.8;
+	box-shadow: 2px 2px 2px black;
+}
+#wrapper {
+	/*width: 100%;*/
+	margin: 4px;
+	/*background-color: black;*/
+}
