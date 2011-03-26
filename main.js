@@ -9,11 +9,11 @@ var ISYPanel = {
 		}
 
 		// hide status/log area
-		if (!CONFIG.showLog) {
+		if (!CONFIG.ShowLog) {
 			document.getElementById('frameStatus').style.display = 'none';
 		}
 		
-		if (CONFIG.showLog && CONFIG.enableLog && document.getElementById('chkEnableLog')) {
+		if (CONFIG.ShowLog && CONFIG.EnableLog && document.getElementById('chkEnableLog')) {
 			document.getElementById('chkEnableLog').checked = true;
 			ISYPanel.log('Enabling log.');
 		}
@@ -23,14 +23,14 @@ var ISYPanel = {
 		//}
 
 		// auto enable logging in OFFLINE mode
-		if (CONFIG.showLog && CONFIG.isOffline && document.getElementById('chkEnableLog')) {
+		if (CONFIG.ShowLog && CONFIG.IsOffline && document.getElementById('chkEnableLog')) {
 			document.getElementById('chkEnableLog').checked = true;
-			ISYPanel.log('Warning: ISYPanel is running in Offline mode! Set CONFIG.isOffline to false before uploading to ISY.');
+			ISYPanel.log('Warning: ISYPanel is running in Offline mode! Set CONFIG.IsOffline to false before uploading to ISY.');
 		}
 		
 		// set title of the Home button
 		if (document.getElementById('btnHome')) {
-			document.getElementById('btnHome').innerText = CONFIG.name;
+			document.getElementById('btnHome').innerText = CONFIG.Name;
 		}
 		
 		// generate controls for current pannel
@@ -47,7 +47,14 @@ var ISYPanel = {
 	*/
 	getIP: function()
 	{
-		var ip = location.hostname;
+		var ip;
+
+		if (location.hash){
+			ip = location.hash;
+		} else {
+			ip = location.hostname;
+		}
+
 		if (!ip) {
 			ip = '127.0.0.1';
 		}
@@ -62,7 +69,7 @@ var ISYPanel = {
 	*/
 	getPanelId: function(ip)
 	{
-		var panels = CONFIG.panels;
+		var panels = CONFIG.Panels;
 		if (panels.length <= 0) return;
 		
 		for (var i=0, ii=panels.length; i<ii; i++)
@@ -162,7 +169,7 @@ var ISYPanel = {
 		
 		var panelId = ISYPanel.getPanelId(ip);
 		
-		var webcams = CONFIG.panels[panelId].webcams;
+		var webcams = CONFIG.Panels[panelId].webcams;
 		
 		if (webcams.length <= 0) return;
 		
@@ -197,7 +204,7 @@ var ISYPanel = {
 				//document.getElementById('frameCameras').appendChild(img);
 			}
 			// assign SRC to imgUrl
-			if (CONFIG.isOffline) {
+			if (CONFIG.IsOffline) {
 				var n = parseInt(i)+1;
 				var src = './cam'+ n +'.png';
 			} else {
@@ -237,7 +244,7 @@ var ISYPanel = {
 		if (!ctrlContainer) { return false;	}
 		
 		// apply stylesheet
-		var css = CONFIG.panels[panelId].css;
+		var css = CONFIG.Panels[panelId].css;
 		if (css) {
 			var cssref=document.createElement('link');
 			cssref.setAttribute('rel', 'stylesheet');
@@ -247,7 +254,7 @@ var ISYPanel = {
 		}
 		
 		// hide webcams pane if no webcams defined for this panel
-		var webcams = CONFIG.panels[panelId].webcams;
+		var webcams = CONFIG.Panels[panelId].webcams;
 		if (!webcams) {
 			var frameCameras = document.getElementById('frameCameras');
 			frameCameras.style.display = 'none';
@@ -258,7 +265,7 @@ var ISYPanel = {
 		}
 		
 		// hide admin controls
-		var admin = CONFIG.panels[panelId].admin;
+		var admin = CONFIG.Panels[panelId].admin;
 		if (!admin)
 		{
 			var btnDevices = document.getElementById('btnDevices');
@@ -272,10 +279,10 @@ var ISYPanel = {
 		}
 		
 		//foreach AREA in the panel generate controls
-		var areas = CONFIG.panels[panelId].areas;
+		var areas = CONFIG.Panels[panelId].areas;
 		if (areas.length <= 0) { return false; }
 
-		var panelName = CONFIG.panels[panelId].name;
+		var panelName = CONFIG.Panels[panelId].name;
 		document.title = 'ISY Panel: ' + panelName;
 		ISYPanel.log('Genetaing controls for panel '+ panelName +'...');
 		
@@ -362,7 +369,7 @@ var ISYPanel = {
 			//cmdString = cmdString.replace('%command%', command);
 			ISYPanel.log('Executing cmd: ' + addr + '=' + command);
 			
-			if (!CONFIG.isOffline) {
+			if (!CONFIG.IsOffline) {
 				var jqxhr = $.post(action, {
 					node: addr, 
 					submit: command

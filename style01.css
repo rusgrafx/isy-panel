@@ -15,3 +15,11 @@ BUTTON {
 	margin: 4px;
 	/*background-color: black;*/
 }
+#frameControl BUTTON {
+	width: 4em;
+	height: 3em;
+	background-color: transparent;
+	color: silver;
+	border-radius: 1em;
+	margin: 2px;
+}
