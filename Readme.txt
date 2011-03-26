@@ -29,7 +29,10 @@ It also has a basic web interface to control all configured (in ISY) devices fro
 
 Here's a quick quiz for you: Does it make much sense to you to show Master Bedroom controls in the Kitchen? Or showing webcam images of the room you are in right now? How about showing all the gazillion controls you might have in your home on your kid bedroom's touch panel?
 
-If you have answered "No" to the above questions then ISY Panel might be right for you.
+If you answered "No" to at least one of the above questions then ISY Panel might be right for you.
+
+
+See [https://code.google.com/p/isy-panel/w/list Wiki] for more information.
 
 
 ==PROJECT STRUCTURE==
