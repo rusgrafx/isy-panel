@@ -1,36 +1,53 @@
 var ISYPanel = {
 	Initialized: false,
 	
+	CONFIG: null,
+	
+	LoadConfig: function()
+	{
+		jQuery.ajax("./config.js", [ dataType="json" ])
+		.error(
+			function() {
+				alert("Error: Unable to read Config.js!");
+			}
+		)
+		.success(
+			function(data) {
+				ISYPanel.CONFIG = jQuery.parseJSON(data);
+				ISYPanel.Init();
+			}
+		);
+		
+	},
+	
 	Init: function()
 	{
-		if (!CONFIG) {
-			alert("Error: The CONFIG object is not initialized or has some errors!");
+		
+		if (!ISYPanel.CONFIG) {
+			alert("Error: The configuration file has not initialized or contains errors!");
 			return false;
 		}
 
 		// hide status/log area
-		if (!CONFIG.ShowLog) {
+		if (!ISYPanel.CONFIG.ShowLog) {
 			document.getElementById('frameStatus').style.display = 'none';
 		}
 		
-		if (CONFIG.ShowLog && CONFIG.EnableLog && document.getElementById('chkEnableLog')) {
+		// Enable logging
+		if (ISYPanel.CONFIG.ShowLog && ISYPanel.CONFIG.EnableLog && document.getElementById('chkEnableLog')) {
 			document.getElementById('chkEnableLog').checked = true;
 			ISYPanel.log('Enabling log.');
 		}
-		// hide camera area
-		//if (!CONFIG.webcams || CONFIG.webcams.length <= 0) {
-		//	document.getElementById('frameCameras').style.display = 'none';
-		//}
 
 		// auto enable logging in OFFLINE mode
-		if (CONFIG.ShowLog && CONFIG.IsOffline && document.getElementById('chkEnableLog')) {
+		if (ISYPanel.CONFIG.ShowLog && ISYPanel.CONFIG.IsOffline && document.getElementById('chkEnableLog')) {
 			document.getElementById('chkEnableLog').checked = true;
 			ISYPanel.log('Warning: ISYPanel is running in Offline mode! Set CONFIG.IsOffline to false before uploading to ISY.');
 		}
 		
 		// set title of the Home button
 		if (document.getElementById('btnHome')) {
-			document.getElementById('btnHome').innerText = CONFIG.Name;
+			document.getElementById('btnHome').innerText = ISYPanel.CONFIG.Name;
 		}
 		
 		// generate controls for current pannel
@@ -69,7 +86,7 @@ var ISYPanel = {
 	*/
 	getPanelId: function(ip)
 	{
-		var panels = CONFIG.Panels;
+		var panels = ISYPanel.CONFIG.Panels;
 		if (panels.length <= 0) return;
 		
 		for (var i=0, ii=panels.length; i<ii; i++)
@@ -169,7 +186,7 @@ var ISYPanel = {
 		
 		var panelId = ISYPanel.getPanelId(ip);
 		
-		var webcams = CONFIG.Panels[panelId].webcams;
+		var webcams = ISYPanel.CONFIG.Panels[panelId].webcams;
 		
 		if (webcams.length <= 0) return;
 		
@@ -204,7 +221,7 @@ var ISYPanel = {
 				//document.getElementById('frameCameras').appendChild(img);
 			}
 			// assign SRC to imgUrl
-			if (CONFIG.IsOffline) {
+			if (ISYPanel.CONFIG.IsOffline) {
 				var n = parseInt(i)+1;
 				var src = './cam'+ n +'.png';
 			} else {
@@ -219,7 +236,7 @@ var ISYPanel = {
 	
 	generateControls: function()
 	{
-		/* Creating the following code for each area in CONFIG.controls
+		/* Creating the following code for each area in ISYPanel.CONFIG.controls
 		**<fieldset>
 		**	<legend>Kitchen</legend>
 		**	<table>
@@ -244,7 +261,7 @@ var ISYPanel = {
 		if (!ctrlContainer) { return false;	}
 		
 		// apply stylesheet
-		var css = CONFIG.Panels[panelId].css;
+		var css = ISYPanel.CONFIG.Panels[panelId].css;
 		if (css) {
 			var cssref=document.createElement('link');
 			cssref.setAttribute('rel', 'stylesheet');
@@ -254,7 +271,7 @@ var ISYPanel = {
 		}
 		
 		// hide webcams pane if no webcams defined for this panel
-		var webcams = CONFIG.Panels[panelId].webcams;
+		var webcams = ISYPanel.CONFIG.Panels[panelId].webcams;
 		if (!webcams) {
 			var frameCameras = document.getElementById('frameCameras');
 			frameCameras.style.display = 'none';
@@ -265,7 +282,7 @@ var ISYPanel = {
 		}
 		
 		// hide admin controls
-		var admin = CONFIG.Panels[panelId].admin;
+		var admin = ISYPanel.CONFIG.Panels[panelId].admin;
 		if (!admin)
 		{
 			var btnDevices = document.getElementById('btnDevices');
@@ -279,12 +296,12 @@ var ISYPanel = {
 		}
 		
 		//foreach AREA in the panel generate controls
-		var areas = CONFIG.Panels[panelId].areas;
+		var areas = ISYPanel.CONFIG.Panels[panelId].areas;
 		if (areas.length <= 0) { return false; }
 
-		var panelName = CONFIG.Panels[panelId].name;
+		var panelName = ISYPanel.CONFIG.Panels[panelId].name;
 		document.title = 'ISY Panel: ' + panelName;
-		ISYPanel.log('Genetaing controls for panel '+ panelName +'...');
+		ISYPanel.log('Generating controls for panel '+ panelName +'...');
 		
 		for (var i in areas) {
 			var loc = areas[i]; //location
@@ -313,26 +330,39 @@ var ISYPanel = {
 				tbd2.setAttribute('class', 'areaCtrl');
 				
 				// create ON button
-				var btnOn = document.createElement('BUTTON');
-				var btnOnTxt = document.createTextNode("ON");
-				btnOn.appendChild(btnOnTxt); btnOnTxt=null;
-				
-				if (c.type = 'device')
+				if (c.on !== false )
 				{
-					btnOn.setAttribute('onclick', "ISYPanel.execDevice('"+c.addr+"', 'ON')");
+					var btnOn = document.createElement('BUTTON');
+					var btnOnTxt = document.createTextNode("ON");
+					btnOn.appendChild(btnOnTxt); btnOnTxt=null;
+					
+					if (c.type == 'device' || c.type == 'scene')
+					{
+						btnOn.setAttribute('onclick', "ISYPanel.execDevice('"+c.addr+"', 'ON')");
+					}
+					if (c.type == 'program')
+					{
+						btnOn.setAttribute('onclick', "ISYPanel.execProgram('"+c.addr+"', 'ON')");
+					}
+					tbd2.appendChild(btnOn); btnOn=null;
 				}
-				tbd2.appendChild(btnOn); btnOn=null;
 				
 				// create OFF button
-				var btnOff = document.createElement('BUTTON');
-				var btnOffTxt = document.createTextNode("OFF");
-				btnOff.appendChild(btnOffTxt); btnOffTxt=null;
-				if (c.type = 'device')
+				if (c.off !== false )
 				{
-					btnOff.setAttribute('onclick', "ISYPanel.execDevice('"+c.addr+"', 'OFF')");
+					var btnOff = document.createElement('BUTTON');
+					var btnOffTxt = document.createTextNode("OFF");
+					btnOff.appendChild(btnOffTxt); btnOffTxt=null;
+					if (c.type == 'device' || c.type == 'scene')
+					{
+						btnOff.setAttribute('onclick', "ISYPanel.execDevice('"+c.addr+"', 'OFF')");
+					}
+					if (c.type == 'program')
+					{
+						btnOff.setAttribute('onclick', "ISYPanel.execProgram('"+c.addr+"', 'OFF')");
+					}
+					tbd2.appendChild(btnOff); btnOff=null;
 				}
-				tbd2.appendChild(btnOff); btnOff=null;
-				
 				tbr.appendChild(tbd2); tbd2=null;
 				tbl.appendChild(tbr);
 			}
@@ -345,7 +375,7 @@ var ISYPanel = {
 	
 	execDevice: function(addr, cmd)
 	{
-		//var cmdString = '/rest/nodes/%addr%/cmd/%command%';
+		//var cmdString = '/rest/nodes/[addr]/cmd/[command]';
 		var action = '/change';
 		var command;
 		
@@ -365,11 +395,11 @@ var ISYPanel = {
 		if (addr != '' && command != '')
 		{
 			addr = addr.replace(/[\.|\s]/g, ' ');
-			//cmdString = cmdString.replace('%addr%', addr);
-			//cmdString = cmdString.replace('%command%', command);
+			//cmdString = cmdString.replace('[addr]', addr);
+			//cmdString = cmdString.replace('[command]', command);
 			ISYPanel.log('Executing cmd: ' + addr + '=' + command);
 			
-			if (!CONFIG.IsOffline) {
+			if (!ISYPanel.CONFIG.IsOffline) {
 				var jqxhr = $.post(action, {
 					node: addr, 
 					submit: command
@@ -377,18 +407,51 @@ var ISYPanel = {
 				.success(function() { ISYPanel.log('Success'); })
 				.error(function() { ISYPanel.log('Error returned'); });
 				//.complete(function() { ISYPanel.log('Complete'); });
+			} else {
+				ISYPanel.log('action: ' + action);
 			}
 		}
 	},
 	
 	execProgram: function(addr, cmd)
 	{
+		var action = '/rest/programs/[pid]/[command]';
+		var command;
 		
+		switch(cmd)
+		{
+			case 'ON':
+				command = 'runThen';
+				break;
+			case 'OFF':
+				command = 'runElse';
+				break;
+			default:
+				command = 'run';
+				break;
+		}
+
+		if (addr != '' && command != '')
+		{
+			action = action.replace('[pid]', addr);
+			action = action.replace('[command]', command);
+			ISYPanel.log('Executing program: ' + addr + '=' + command);
+			
+			if (!ISYPanel.CONFIG.IsOffline) {
+				var jqxhr = $.get(action)
+				.success(function() { ISYPanel.log('Success'); })
+				.error(function() { ISYPanel.log('Error returned'); });
+				//.complete(function() { ISYPanel.log('Complete'); });
+			} else {
+				ISYPanel.log('action: ' + action);
+			}
+		}
 	},
 	
 	showWeather: function()
 	{
-		var zip = CONFIG.zipcode;
+		var zip = ISYPanel.CONFIG.ZipCode;
+		alert("This function is not implemented yet.");
 	},
 	
 	loadControls: function()
@@ -470,4 +533,4 @@ var ISYPanel = {
 	}
 };
 
-ISYPanel.Init();
+ISYPanel.LoadConfig();
