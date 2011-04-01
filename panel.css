@@ -112,12 +112,16 @@ HTML, BODY, DIV, IFRAME, LABEL, SELECT, OPTION {
 
 /* FOOTER / LOG */
 #frameStatus #statusContainer {
+	height: 50px; /* default height of the log window */
 	padding-left: .5em;
-	height: 50px;
 	border: 1px groove gray;
 	font-size: 90%;
 	font-family: Terminal, Courier, monospace;
 	overflow-y: auto;
+}
+/* this rule defines the height of expanded log window */
+#frameStatus #statusContainer.expanded {
+	height: 350px;
 }
 #frameStatus BUTTON {
 	background-color: transparent;
