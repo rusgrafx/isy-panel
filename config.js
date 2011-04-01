@@ -18,8 +18,8 @@
 			"css": "./style02.css",
 			"webcams":		
 			[
-				{ "id": "cam_fr", "name": "Family Room", "addr": "http://192.168.20.4", "imgUrl": "/SnapshotJPEG?Resolution=320x240&Quality=Clarity" },
-				{ "id": "cam_gr", "name": "Guest Room", "addr": "http://192.168.20.2:8002", "imgUrl": "/SnapshotJPEG?Resolution=320x240&Quality=Clarity" }
+				{ "name": "Family Room", "addr": "http://192.168.20.4", "imgUrl": "/SnapshotJPEG?Resolution=320x240&Quality=Clarity" },
+				{ "name": "Guest Room", "addr": "http://192.168.20.2:8002", "imgUrl": "/SnapshotJPEG?Resolution=320x240&Quality=Clarity" }
 			],
 			"areas":
 			[

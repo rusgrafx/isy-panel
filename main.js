@@ -15,13 +15,7 @@ var ISYPanel = {
 		jQuery.ajax("./config.js", [ dataType="json" ])
 		.error(
 			function() {
-				var msg;
-				
-				if ('file:' == window.location.protocol) {
-					msg = "\n\nISY Panel should be served from the web server!\nIt won't work with file:// protocol due to JS security restrictions.";
-				}
-				
-				alert('Error: Unable to read Config.js!' + msg);
+				ISYPanel.showError('CONFIGNOTLOADED');
 			}
 		)
 		.success(
@@ -40,25 +34,24 @@ var ISYPanel = {
 	Init: function()
 	{
 		// Double check that CONFIG is ready
-		if (!ISYPanel.CONFIG) {
-			alert("Error: The configuration file has not initialized or contains errors!");
+		if (! ISYPanel.CONFIG) {
+			ISYPanel.showError('CONFIGISBROKEN');
 			return -1;
 		}
 		
 		// Hide status/log area
-		if (!ISYPanel.CONFIG.ShowLog) {
+		if (! ISYPanel.CONFIG.ShowLog) {
 			document.getElementById('frameStatus').style.display = 'none';
 		}
 		
 		// Enable logging
 		if (ISYPanel.CONFIG.ShowLog && ISYPanel.CONFIG.EnableLog && document.getElementById('chkEnableLog')) {
-			document.getElementById('chkEnableLog').checked = true;
-			ISYPanel.log('Enabling log.');
+			ISYPanel.enableLog();
 		}
 		
 		// Auto enable logging in OFFLINE mode
 		if (ISYPanel.CONFIG.ShowLog && ISYPanel.CONFIG.IsOffline && document.getElementById('chkEnableLog')) {
-			document.getElementById('chkEnableLog').checked = true;
+			ISYPanel.enableLog();
 			ISYPanel.log('Warning: ISYPanel is running in Offline mode! Set CONFIG.IsOffline to false before uploading to ISY.');
 		}
 		
@@ -67,9 +60,10 @@ var ISYPanel = {
 			document.getElementById('btnHome').innerText = ISYPanel.CONFIG.Name;
 		}
 		
+		// Get Id for current panel
 		var ip = ISYPanel.getIP();
 		ISYPanel.PanelId = ISYPanel.getPanelId(ip);
-
+		
 		// Generate controls for current pannel
 		ISYPanel.generateControls();
 		
@@ -85,7 +79,7 @@ var ISYPanel = {
 	getIP: function()
 	{
 		var ip;
-
+		
 		if (location.hash) {
 			ip = location.hash;
 		} else {
@@ -152,7 +146,7 @@ var ISYPanel = {
 		}
 	},
 
-	/*
+	/**
 	* Clears the debug pane
 	*/
 	ClearLog: function()
@@ -161,6 +155,21 @@ var ISYPanel = {
 		log.innerHTML = ISYPanel.getTimeString() +' : '+ 'Log cleared <br />';
 	},
 	
+	/**
+	* Enable logging
+	*/
+	enableLog: function()
+	{
+		if (! $('#chkEnableLog').attr('checked')) {
+			$('#chkEnableLog').attr('checked', 'checked');
+			//document.getElementById('chkEnableLog').checked = true;
+			ISYPanel.log('Enabling log.');
+		}
+	},
+	
+	/**
+	* Event handler for Poll Cameras checkbox
+	*/
 	chkPollCameras_CheckEventHandler: function()
 	{
 		var cBox = document.getElementById('chkPollCameras');
@@ -174,6 +183,9 @@ var ISYPanel = {
 		}
 	},
 
+	/**
+	* Checks if Poll Cameras is enabled and calls getCamImages()
+	*/
 	cameraPolling: function()
 	{
 		var cBox = document.getElementById('chkPollCameras');
@@ -184,9 +196,17 @@ var ISYPanel = {
 		}
 	},
 	
+	/**
+	* Generates DOM tree for Cameras pane or updates camera images if tree
+	* was previously generated.
+	*/
 	getCamImages: function()
 	{
-		if (! ISYPanel.PanelId ) { return -1 }
+		if (ISYPanel.PanelId === null) {
+			ISYPanel.showError('MISSINGPANELID');
+			return -1;
+		}
+		
 		if (! document.getElementById('chkPollCameras').checked) { return -1 }
 		
 		ISYPanel.log('Updating camera images...');
@@ -196,16 +216,17 @@ var ISYPanel = {
 		if (webcams.length <= 0) { return -1 }
 		
 		for (var i in webcams) {
-		
+			
 			var cam = webcams[i];
+			var camId = 'id_cam' + i;
 			
 			// create IMG element or update existing
-			if (document.getElementById(cam.id)) {
-				var img = document.getElementById(cam.id);
+			if (document.getElementById(camId)) {
+				var img = document.getElementById(camId);
 			} else {
 				var box = document.createElement('DIV');
 				box.className = 'boxCamImage';
-
+				
 				var lbl = document.createElement('DIV');
 				lbl.setAttribute('class', 'camLabel');
 				
@@ -213,7 +234,7 @@ var ISYPanel = {
 				
 				var img = document.createElement('IMG');
 				// set basic params
-				img.setAttribute('id', cam.id);
+				img.setAttribute('id', camId);
 				img.setAttribute('width', 320);
 				img.setAttribute('height', 240);
 				
@@ -241,9 +262,12 @@ var ISYPanel = {
 		return 0;
 	},
 	
+	/**
+	* Generates DOM tree for all areas/controls defined in CONFIG for current panel.
+	*/
 	generateControls: function()
 	{
-		/* Creating the following code for each area in ISYPanel.CONFIG's controls
+		/* Creating the following HTML code for each area in ISYPanel.CONFIG's controls
 		**<fieldset>
 		**	<legend>Kitchen</legend>
 		**	<table>
@@ -262,8 +286,11 @@ var ISYPanel = {
 		**</fieldset>
 		*/
 		
-		if (! ISYPanel.PanelId ) { return -1 }
-
+		if (ISYPanel.PanelId === null) {
+			ISYPanel.showError('MISSINGPANELID');
+			return -1;
+		}
+		
 		// get the container
 		var ctrlContainer = document.getElementById('ctrlContainer');
 		if (!ctrlContainer) { return -1 }
@@ -321,7 +348,7 @@ var ISYPanel = {
 			fld.appendChild(leg); leg=null;
 			
 			var tbl = document.createElement('TABLE');
-
+			
 			for (var j=0, jj=loc.controls.length; j<jj; j++)
 			{
 				var c = loc.controls[j];
@@ -382,6 +409,9 @@ var ISYPanel = {
 		return 0;
 	},
 	
+	/**
+	* Execute ON or OFF command on a control or scene
+	*/
 	execDevice: function(addr, cmd)
 	{
 		//var cmdString = '/rest/nodes/[addr]/cmd/[command]';
@@ -422,6 +452,9 @@ var ISYPanel = {
 		}
 	},
 	
+	/**
+	* Executes ISY program
+	*/
 	execProgram: function(addr, cmd)
 	{
 		var action = '/rest/programs/[pid]/[command]';
@@ -439,7 +472,7 @@ var ISYPanel = {
 				command = 'run';
 				break;
 		}
-
+		
 		if (addr != '' && command != '')
 		{
 			action = action.replace('[pid]', addr);
@@ -457,12 +490,60 @@ var ISYPanel = {
 		}
 	},
 	
+	/**
+	* Display weather forecast in the panel
+	* TODO: This function is not implemented yet. It might use either ISY's weather module
+	* or some external service like Google, Wunderground, etc.
+	*/
 	showWeather: function()
 	{
 		var zip = ISYPanel.CONFIG.ZipCode;
-		alert("This function is not implemented yet.");
+		if (! zip) {
+		    showError('MISSINGZIP');
+		    return -1;
+		}
+		alert('This function is not implemented yet!');
+		
+		//var url="http://weathersticker.wunderground.com/weathersticker/cgi-bin/banner/ban/wxBanner?bannertype=wu_clean2day_cond&zipcode=94568";
+		return 0;
 	},
 	
+	/**
+	* Load weather forecast from Wunderground into an iframe
+	*/
+	loadWeather: function()
+	{
+		var zip = ISYPanel.CONFIG.ZipCode;
+		if (! zip) {
+		    showError('MISSINGZIP');
+		    return -1;
+		}
+		
+		ISYPanel.log('Loading weather map for Zip code: ' + zip);
+		//var url = 'http://www.wund.com/cgi-bin/findweather/getForecast?query=' + zip;
+		var url = 'http://www.wunderground.com/cgi-bin/findweather/getForecast?brand=wxmap&query=' + zip;
+		
+		// Load weather forecast to an iframe
+		var ctrlContainer = document.getElementById('ctrlContainer');
+		if (!ctrlContainer) { return -1 }
+		// clear contents of ctrlContainer
+		ctrlContainer.innerHTML = "";
+		// create IFRAME element
+		var ifr = document.createElement('IFRAME');
+		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
+		var ifrHeight = ctrlContainer.offsetHeight < 400 ? 600 : ctrlContainer.offsetHeight;
+		ifr.setAttribute('height', ifrHeight);
+		// set SRC of IFRAME to url
+		ifr.setAttribute('src', url);
+		ctrlContainer.appendChild(ifr); ifr = null;
+		ctrlContainer.style.backgroundColor = 'white';
+		return 0;
+	    
+	},
+
+	/**
+	* Re-generates panel controls after switching from another frame
+	*/
 	loadControls: function()
 	{
 		// Load controls to ctrlContainer
@@ -476,6 +557,9 @@ var ISYPanel = {
 		return 0;
 	},
 	
+	/**
+	* Load Devices pane from standard ISY interface into an iframe. This is ADMIN option.
+	*/
 	loadDevices: function()
 	{
 		// Load /devices to an iframe
@@ -483,6 +567,8 @@ var ISYPanel = {
 		if (!ctrlContainer) { return -1 }
 		// clear contents of ctrlContainer
 		ctrlContainer.innerHTML = "";
+		
+		ISYPanel.log('Loading Devices screen...');
 		// create IFRAME element
 		var ifr = document.createElement('IFRAME');
 		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
@@ -495,6 +581,9 @@ var ISYPanel = {
 		return 0;
 	},
 	
+	/**
+	* Load Scenes pane from standard ISY interface into an iframe. This is ADMIN option.
+	*/
 	loadScenes: function()
 	{
 		// Load /scenes to an iframe
@@ -502,6 +591,8 @@ var ISYPanel = {
 		if (!ctrlContainer) { return -1 }
 		// clear contents of ctrlContainer
 		ctrlContainer.innerHTML = "";
+		
+		ISYPanel.log('Loading Scenes screen...');
 		// create IFRAME element
 		var ifr = document.createElement('IFRAME');
 		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
@@ -514,6 +605,9 @@ var ISYPanel = {
 		return 0;
 	},
 	
+	/**
+	* Load Programs pane from standard ISY interface into an iframe. This is ADMIN option.
+	*/
 	loadPgms: function()
 	{
 		// Load /pgms to an iframe
@@ -521,6 +615,8 @@ var ISYPanel = {
 		if (!ctrlContainer) { return -1	}
 		// clear contents of ctrlContainer
 		ctrlContainer.innerHTML = "";
+		
+		ISYPanel.log('Loading Programs screen...');
 		// create IFRAME element
 		var ifr = document.createElement('IFRAME');
 		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
@@ -533,16 +629,53 @@ var ISYPanel = {
 		return 0;
 	},
 	
+	/**
+	* Enlarges debug/logger pane.
+	*/
 	ExpandLog: function()
 	{
 		if ($('#btnExpandLog').text() == '+')
 		{
-			document.getElementById('statusContainer').style.height = '200px';
-			document.getElementById('btnExpandLog').innerText = '-';
+			$('#statusContainer').addClass('expanded');
+			$('#btnExpandLog').text('-');
 		} else {
-			document.getElementById('statusContainer').style.height = '50px';
-			document.getElementById('btnExpandLog').innerText = '+';
+			$('#statusContainer').removeClass('expanded');
+			$('#btnExpandLog').text('+');
 		}
+	},
+	
+	/**
+	* Show alert box with error message
+	*/
+	showError: function(err)
+	{
+		var msg = 'Error: ';
+		
+		switch(err)
+		{
+			case 'MISSINGPANELID':
+				msg += 'Panel Id cannot be determined. Please check your configuration and try again.';
+				break;
+			case 'CONFIGNOTLOADED':
+				msg += 'Unable to read Config.js! Please check your configuration and try again.';
+				break;
+			case 'CONFIGISBROKEN':
+				msg += 'Config.js is incomplete or contains errors! Please check your configuration and try again.';
+				break;
+			case 'MISSINGZIP':
+				msg += 'Please specify 5-digit ZIP code in your configuration file';
+			default:
+				msg += 'Unknown error';
+		}
+		
+		if ('file:' == window.location.protocol) {
+			msg += "\n\nNote: ISY Panel should be served from the web server!\nIt won't work with file:// protocol due to JS security restrictions.";
+		}
+		
+		alert(msg);
+		
+		ISYPanel.enableLog();
+		ISYPanel.log(msg);
 	}
 };
 
