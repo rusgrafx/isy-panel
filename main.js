@@ -1,14 +1,27 @@
 var ISYPanel = {
+	
 	Initialized: false,
+	
+	PanelId: null,
 	
 	CONFIG: null,
 	
+	/**
+	* Loads panel configuration from the JSON file.
+	* If config was successfully loaded (and parsed) then initializes the application.
+	*/
 	LoadConfig: function()
 	{
 		jQuery.ajax("./config.js", [ dataType="json" ])
 		.error(
 			function() {
-				alert("Error: Unable to read Config.js!");
+				var msg;
+				
+				if ('file:' == window.location.protocol) {
+					msg = "\n\nISY Panel should be served from the web server!\nIt won't work with file:// protocol due to JS security restrictions.";
+				}
+				
+				alert('Error: Unable to read Config.js!' + msg);
 			}
 		)
 		.success(
@@ -17,18 +30,22 @@ var ISYPanel = {
 				ISYPanel.Init();
 			}
 		);
-		
+		return false;
 	},
 	
+	/**
+	* This is the main entry into the ISY Panel.
+	* It prepares the GUI components and loads controls for specific panel.
+	*/
 	Init: function()
 	{
-		
+		// Double check that CONFIG is ready
 		if (!ISYPanel.CONFIG) {
 			alert("Error: The configuration file has not initialized or contains errors!");
-			return false;
+			return -1;
 		}
-
-		// hide status/log area
+		
+		// Hide status/log area
 		if (!ISYPanel.CONFIG.ShowLog) {
 			document.getElementById('frameStatus').style.display = 'none';
 		}
@@ -38,76 +55,68 @@ var ISYPanel = {
 			document.getElementById('chkEnableLog').checked = true;
 			ISYPanel.log('Enabling log.');
 		}
-
-		// auto enable logging in OFFLINE mode
+		
+		// Auto enable logging in OFFLINE mode
 		if (ISYPanel.CONFIG.ShowLog && ISYPanel.CONFIG.IsOffline && document.getElementById('chkEnableLog')) {
 			document.getElementById('chkEnableLog').checked = true;
 			ISYPanel.log('Warning: ISYPanel is running in Offline mode! Set CONFIG.IsOffline to false before uploading to ISY.');
 		}
 		
-		// set title of the Home button
+		// Set title of the Home button
 		if (document.getElementById('btnHome')) {
 			document.getElementById('btnHome').innerText = ISYPanel.CONFIG.Name;
 		}
 		
-		// generate controls for current pannel
+		var ip = ISYPanel.getIP();
+		ISYPanel.PanelId = ISYPanel.getPanelId(ip);
+
+		// Generate controls for current pannel
 		ISYPanel.generateControls();
 		
 		ISYPanel.Initialized = true;
 		ISYPanel.log('GUI has initialized');
-		return true;
+		return 0;
 	},
 	
 	/**
-	* Returns IP address of the local host
-	* TODO: need to find a reliable way to get IP
+	* Returns IP address of the client's host (or hash tag from the URL)
+	* TODO: need to find a reliable way to get client IP
 	*/
 	getIP: function()
 	{
 		var ip;
 
-		if (location.hash){
+		if (location.hash) {
 			ip = location.hash;
 		} else {
-			ip = location.hostname;
+			ip = '*'; // load the default panel
 		}
-
-		if (!ip) {
-			ip = '127.0.0.1';
-		}
+		
 		ISYPanel.log('Panel IP: ' + ip);
 		return ip;
 	},
 	
 	/**
-	* Returns panel GUI for current IP
-	* @param {string} ip The IP address for panel
-	}
+	* Returns index of the panel for current IP
+	* @param {string} ip The IP address (or hash tag) for panel
 	*/
 	getPanelId: function(ip)
 	{
 		var panels = ISYPanel.CONFIG.Panels;
-		if (panels.length <= 0) return;
+		
+		if (panels.length <= 0) return -1;
 		
 		for (var i=0, ii=panels.length; i<ii; i++)
 		{
 			var addr = panels[i].addr;
-
-			if (addr != '*' && addr.indexOf(ip) == -1) {
+			
+			if (addr !== '*' && addr.indexOf(ip) === -1) {
 				continue;
 			}
 			
-			return i; 
+			return i;
 		}
-	},
-	
-	/**
-	* Returns raw timestamp. Used as unique number to prevent caching of camera images.
-	*/
-	getTimeStamp: function()
-	{
-		var now    = new Date();
-		return now.getTime();
+		return -1;
 	},
 	
 	/**
@@ -177,21 +186,17 @@ var ISYPanel = {
 	
 	getCamImages: function()
 	{
-		//if (! document.getElementById('chkPollCameras').checked) {
-		//	return;
-		//}
+		if (! ISYPanel.PanelId ) { return -1 }
+		if (! document.getElementById('chkPollCameras').checked) { return -1 }
+		
 		ISYPanel.log('Updating camera images...');
 		
-		var ip = ISYPanel.getIP();
+		var webcams = ISYPanel.CONFIG.Panels[ISYPanel.PanelId].webcams;
 		
-		var panelId = ISYPanel.getPanelId(ip);
-		
-		var webcams = ISYPanel.CONFIG.Panels[panelId].webcams;
-		
-		if (webcams.length <= 0) return;
+		if (webcams.length <= 0) { return -1 }
 		
 		for (var i in webcams) {
-
+		
 			var cam = webcams[i];
 			
 			// create IMG element or update existing
@@ -225,43 +230,46 @@ var ISYPanel = {
 				var n = parseInt(i)+1;
 				var src = './cam'+ n +'.png';
 			} else {
-				var src = cam.addr + cam.imgUrl + '&NoCache=' + ISYPanel.getTimeStamp();
+				var src = cam.addr + cam.imgUrl + '&NoCache=' + jQuery.now();
 			}
 			ISYPanel.log('Loading image from: ' + src);
 			img.setAttribute('src', src);
 		}
 		ISYPanel.log('Images updated');
 		ISYPanel.cameraPolling();
+		
+		return 0;
 	},
 	
 	generateControls: function()
 	{
-		/* Creating the following code for each area in ISYPanel.CONFIG.controls
+		/* Creating the following code for each area in ISYPanel.CONFIG's controls
 		**<fieldset>
 		**	<legend>Kitchen</legend>
 		**	<table>
 		**		<tr>
 		**			<td class="areaName">Ceiling</td>
-		**			<td class="areaCtrl"><button>ON</button><button>OFF</button><button>Status</button></td>
+		**			<td class="areaCtrl">
+		**				<button>ON</button>
+		**				<button>OFF</button>
+		**			</td>
 		**		</tr>
 		**		<tr>
-		**			<td...>
-		**			<td...>
+		**			<td.../>
+		**			<td.../>
 		**		</tr>
 		**	</table>
 		**</fieldset>
 		*/
 		
-		var ip = ISYPanel.getIP();
-		
-		var panelId = ISYPanel.getPanelId(ip);
+		if (! ISYPanel.PanelId ) { return -1 }
 
 		// get the container
 		var ctrlContainer = document.getElementById('ctrlContainer');
-		if (!ctrlContainer) { return false;	}
+		if (!ctrlContainer) { return -1 }
 		
 		// apply stylesheet
-		var css = ISYPanel.CONFIG.Panels[panelId].css;
+		var css = ISYPanel.CONFIG.Panels[ISYPanel.PanelId].css;
 		if (css) {
 			var cssref=document.createElement('link');
 			cssref.setAttribute('rel', 'stylesheet');
@@ -271,7 +279,7 @@ var ISYPanel = {
 		}
 		
 		// hide webcams pane if no webcams defined for this panel
-		var webcams = ISYPanel.CONFIG.Panels[panelId].webcams;
+		var webcams = ISYPanel.CONFIG.Panels[ISYPanel.PanelId].webcams;
 		if (!webcams) {
 			var frameCameras = document.getElementById('frameCameras');
 			frameCameras.style.display = 'none';
@@ -282,7 +290,7 @@ var ISYPanel = {
 		}
 		
 		// hide admin controls
-		var admin = ISYPanel.CONFIG.Panels[panelId].admin;
+		var admin = ISYPanel.CONFIG.Panels[ISYPanel.PanelId].admin;
 		if (!admin)
 		{
 			var btnDevices = document.getElementById('btnDevices');
@@ -296,10 +304,10 @@ var ISYPanel = {
 		}
 		
 		//foreach AREA in the panel generate controls
-		var areas = ISYPanel.CONFIG.Panels[panelId].areas;
-		if (areas.length <= 0) { return false; }
+		var areas = ISYPanel.CONFIG.Panels[ISYPanel.PanelId].areas;
+		if (areas.length <= 0) { return -1 }
 
-		var panelName = ISYPanel.CONFIG.Panels[panelId].name;
+		var panelName = ISYPanel.CONFIG.Panels[ISYPanel.PanelId].name;
 		document.title = 'ISY Panel: ' + panelName;
 		ISYPanel.log('Generating controls for panel '+ panelName +'...');
 		
@@ -371,6 +379,7 @@ var ISYPanel = {
 			ctrlContainer.appendChild(fld);
 		}
 		ISYPanel.log('Controls generated');
+		return 0;
 	},
 	
 	execDevice: function(addr, cmd)
@@ -458,19 +467,20 @@ var ISYPanel = {
 	{
 		// Load controls to ctrlContainer
 		var ctrlContainer = document.getElementById('ctrlContainer');
-		if (!ctrlContainer) { return false;	}
+		if (!ctrlContainer) { return -1	}
 		// clear contents of ctrlContainer
 		ctrlContainer.innerHTML = "";
 		// generate controls
 		ISYPanel.generateControls();
 		ctrlContainer.style.backgroundColor = 'transparent';
+		return 0;
 	},
 	
 	loadDevices: function()
 	{
 		// Load /devices to an iframe
 		var ctrlContainer = document.getElementById('ctrlContainer');
-		if (!ctrlContainer) { return false;	}
+		if (!ctrlContainer) { return -1 }
 		// clear contents of ctrlContainer
 		ctrlContainer.innerHTML = "";
 		// create IFRAME element
@@ -482,13 +492,14 @@ var ISYPanel = {
 		ifr.setAttribute('src', '/devices');
 		ctrlContainer.appendChild(ifr); ifr = null;
 		ctrlContainer.style.backgroundColor = 'white';
+		return 0;
 	},
 	
 	loadScenes: function()
 	{
 		// Load /scenes to an iframe
 		var ctrlContainer = document.getElementById('ctrlContainer');
-		if (!ctrlContainer) { return false;	}
+		if (!ctrlContainer) { return -1 }
 		// clear contents of ctrlContainer
 		ctrlContainer.innerHTML = "";
 		// create IFRAME element
@@ -500,13 +511,14 @@ var ISYPanel = {
 		ifr.setAttribute('src', '/scenes');
 		ctrlContainer.appendChild(ifr); ifr = null;
 		ctrlContainer.style.backgroundColor = 'white';
+		return 0;
 	},
 	
 	loadPgms: function()
 	{
 		// Load /pgms to an iframe
 		var ctrlContainer = document.getElementById('ctrlContainer');
-		if (!ctrlContainer) { return false;	}
+		if (!ctrlContainer) { return -1	}
 		// clear contents of ctrlContainer
 		ctrlContainer.innerHTML = "";
 		// create IFRAME element
@@ -518,6 +530,7 @@ var ISYPanel = {
 		ifr.setAttribute('src', '/pgms');
 		ctrlContainer.appendChild(ifr); ifr = null;
 		ctrlContainer.style.backgroundColor = 'white';
+		return 0;
 	},
 	
 	ExpandLog: function()
