@@ -13,7 +13,7 @@
 	[
 		{ 
 			"addr":  "#kitchen,192.168.20.27",
-			"admin": true,
+			"admin": false,
 			"name":  "Kitchen",
 			"css": "./style02.css",
 			"webcams":		
@@ -53,7 +53,7 @@
 		},
 		{
 			"addr": "*",
-			"admin": false,
+			"admin": true,
 			"name": "Mi Casa",
 			"css": "./style01.css",
 			"areas":

@@ -6,6 +6,8 @@ var ISYPanel = {
 	
 	CONFIG: null,
 	
+	IsyModules: {}, // will store installed ISY modules
+	
 	/**
 	* Loads panel configuration from the JSON file.
 	* If config was successfully loaded (and parsed) then initializes the application.
@@ -66,6 +68,9 @@ var ISYPanel = {
 		
 		// Generate controls for current pannel
 		ISYPanel.generateControls();
+		
+		// Display current temperature
+		ISYPanel.showWeather();
 		
 		ISYPanel.Initialized = true;
 		ISYPanel.log('GUI has initialized');
@@ -497,15 +502,59 @@ var ISYPanel = {
 	*/
 	showWeather: function()
 	{
+		
 		var zip = ISYPanel.CONFIG.ZipCode;
 		if (! zip) {
 		    showError('MISSINGZIP');
 		    return -1;
 		}
-		alert('This function is not implemented yet!');
 		
-		//var url="http://weathersticker.wunderground.com/weathersticker/cgi-bin/banner/ban/wxBanner?bannertype=wu_clean2day_cond&zipcode=94568";
+		//TODO: verify that Climate module is installed and enabled
+		//
+		
+		var url = (ISYPanel.CONFIG.IsOffline) ? './climate.xml' : '/rest/climate';
+		
+		ISYPanel.log('Updating current weather info...')
+		
+		$.ajax({
+			type: "GET",
+			timeout: 60000,
+			url: url,
+			dataType: 'xml',
+			error: function(XMLHttpRequest, textStatus, errorThrown){
+				ISYPanel.log(textStatus + ' loading: ' + url);
+				ISYPanel.showError('CLIMATENOTLOADED');
+			},
+			success: function(data){
+				ISYPanel.updateClimateDisplay(data);
+				setTimeout("ISYPanel.showWeather()", 3500000);
+			}
+		});
 		return 0;
+	},
+	
+	/**
+	* Update GUI with weather data
+	* @param {Object} data XML document containing weather data
+	*/
+	updateClimateDisplay: function(data)
+	{
+	        if (!data){return -1;}
+        
+		if ($(data).find('climate').size())
+		{
+			var climate = $(data).find('climate');
+		        var tempCurrent = $(climate).find('Temperature').text();
+		        var tempHigh = $(climate).find('Temperature_High').text();
+		        var tempLow =  $(climate).find('Temperature_Low').text();
+                
+			//TODO: validation and clean up
+		        if (tempCurrent) $('div#boxTempCurrent').html(tempCurrent);
+		        if (tempHigh) $('div#boxTempHigh').html(tempHigh);
+		        if (tempLow) $('div#boxTempLow').html(tempLow);
+			return 0;
+		}
+		return -1;
 	},
 	
 	/**
@@ -572,7 +621,7 @@ var ISYPanel = {
 		// create IFRAME element
 		var ifr = document.createElement('IFRAME');
 		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
-		var ifrHeight = ctrlContainer.offsetHeight < 400 ? 400 : ctrlContainer.offsetHeight;
+		var ifrHeight = ctrlContainer.offsetHeight < 400 ? 600 : ctrlContainer.offsetHeight;
 		ifr.setAttribute('height', ifrHeight);
 		// set SRC of IFRAME to /devices
 		ifr.setAttribute('src', '/devices');
@@ -596,7 +645,7 @@ var ISYPanel = {
 		// create IFRAME element
 		var ifr = document.createElement('IFRAME');
 		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
-		var ifrHeight = ctrlContainer.offsetHeight < 400 ? 400 : ctrlContainer.offsetHeight;
+		var ifrHeight = ctrlContainer.offsetHeight < 400 ? 600 : ctrlContainer.offsetHeight;
 		ifr.setAttribute('height', ifrHeight);
 		// set SRC of IFRAME to /scenes
 		ifr.setAttribute('src', '/scenes');
@@ -620,7 +669,7 @@ var ISYPanel = {
 		// create IFRAME element
 		var ifr = document.createElement('IFRAME');
 		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
-		var ifrHeight = ctrlContainer.offsetHeight < 400 ? 400 : ctrlContainer.offsetHeight;
+		var ifrHeight = ctrlContainer.offsetHeight < 400 ? 600 : ctrlContainer.offsetHeight;
 		ifr.setAttribute('height', ifrHeight);
 		// set SRC of IFRAME to /pgms
 		ifr.setAttribute('src', '/pgms');
@@ -664,6 +713,10 @@ var ISYPanel = {
 				break;
 			case 'MISSINGZIP':
 				msg += 'Please specify 5-digit ZIP code in your configuration file';
+				break;
+			case 'CLIMATENOTLOADED':
+				msg += 'Unable to read Weather data!';
+				break;
 			default:
 				msg += 'Unknown error';
 		}

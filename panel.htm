@@ -11,12 +11,17 @@
 <body>
 	<div id="wrapper">
 		<div id="frameMenu">
-			<div>
+			<div id="boxMenuButtons">
 				<button id="btnHome"     onClick="ISYPanel.loadControls();">Home</button>
 				<button id="btnWeather"  onClick="ISYPanel.loadWeather();">Weather</button>
 				<button id="btnDevices"  onClick="ISYPanel.loadDevices();">Devices</button> 
 				<button id="btnScenes"   onClick="ISYPanel.loadScenes();">Scenes</button> 
 				<button id="btnPrograms" onClick="ISYPanel.loadPgms();">Programs</button>
+				<div id="boxClimate">
+					<div id="boxTempCurrent">--- F</div>
+					<div id="boxTempHigh">--- F</div>
+					<div id="boxTempLow">--- F</div>
+				</div>
 			</div>
 		</div>
 
