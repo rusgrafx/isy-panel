@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Komodo Project File - DO NOT EDIT -->
+<project id="5a14d65a-4517-4fde-b483-933fe12c71e6" kpf_version="5" name="isy-panel.komodoproject">
+<file id="43247798-ee86-40ea-beae-4f583dd3bb2a" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="panel.css" url="panel.css">
+</file>
+<file id="4c1bad25-97e1-4b23-a9fb-10ab1c7f51e9" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="panel.htm" url="panel.htm">
+</file>
+<file id="826500e1-2a42-4010-8e23-a54761f8cfd5" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="config.js" url="config.js">
+</file>
+<folder id="8ba11c77-8405-46d4-9b2b-69acffc02b27" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="support">
+</folder>
+<folder id="8ceb2e0a-e82f-4dd9-9056-be0b64f4b8a5" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="Panel01">
+</folder>
+<folder id="9c188fbd-a9a1-4471-a0c2-cd59d26696b0" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="Panel02">
+</folder>
+<file id="dbed58f5-6a2c-49fd-8229-bc1f31c9cb61" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="main.js" url="main.js">
+</file>
+<file id="2f334273-0be0-4397-a75e-2f274b6bb503" idref="8ba11c77-8405-46d4-9b2b-69acffc02b27" name="Readme.txt" url="Readme.txt">
+</file>
+<file id="c5743018-7a34-4286-bdd4-20f6b074c96f" idref="8ba11c77-8405-46d4-9b2b-69acffc02b27" name="configjs.txt" url="configjs.txt">
+</file>
+<file id="03af591f-f6dd-482a-b04b-edde90e81faf" idref="8ceb2e0a-e82f-4dd9-9056-be0b64f4b8a5" name="backgr01.jpg" url="backgr01.jpg">
+</file>
+<file id="d8920ee3-147e-48d3-b3c6-c628c20ec712" idref="8ceb2e0a-e82f-4dd9-9056-be0b64f4b8a5" name="style01.css" url="style01.css">
+</file>
+<file id="9d8bd725-ea8c-4d83-b3aa-df8624779b1d" idref="9c188fbd-a9a1-4471-a0c2-cd59d26696b0" name="backgr02.jpg" url="backgr02.jpg">
+</file>
+<file id="d5c87633-641b-4b59-828e-674133e9a025" idref="9c188fbd-a9a1-4471-a0c2-cd59d26696b0" name="style02.css" url="style02.css">
+</file>
+<preference-set idref="5a14d65a-4517-4fde-b483-933fe12c71e6">
+  <string relative="path" id="import_dirname"></string>
+  <string id="import_exclude_matches">*.*~;*.bak;*.tmp;CVS;.#*;*.pyo;*.pyc;.svn;_svn;.git;.hg;.bzr;*%*;tmp*.html;.DS_Store;*.swp;*.kpf;*.komodoproject;*.komodotools</string>
+  <string id="import_include_matches"></string>
+  <string id="javascriptExtraPaths"></string>
+  <string id="mappedPaths"></string>
+  <string id="perlExtraPaths"></string>
+  <boolean id="perl_lintOption_includeCurrentDirForLinter">1</boolean>
+  <string id="phpExtraPaths"></string>
+  <string id="pythonExtraPaths"></string>
+  <string id="rubyExtraPaths"></string>
+</preference-set>
+</project>
