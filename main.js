@@ -68,6 +68,7 @@ var ISYPanel = {
 		
 		// Generate controls for current pannel
 		ISYPanel.generateControls();
+		ISYPanel.generateShortcutButtons();
 		
 		// Display current temperature
 		ISYPanel.showWeather();
@@ -134,7 +135,7 @@ var ISYPanel = {
 		if (hour   < 10) { hour   = "0" + hour;   }
 		if (minute < 10) { minute = "0" + minute; }
 		if (second < 10) { second = "0" + second; }
-		var timeString = hour + ':' + minute + ':' + second + " " + ap;
+		var timeString = hour + ':' + minute + ':' + second + ' ' + ap;
 		return timeString;
 	},
 	
@@ -199,6 +200,70 @@ var ISYPanel = {
 			ISYPanel.log('Setting camera polling interval to ' + tOut.value + ' msec');
 			setTimeout("ISYPanel.getCamImages()", tOut.value);
 		}
+	},
+	
+	/**
+	* Create user-defined menu buttons based on Panels[i].shortcuts
+	*/
+	generateShortcutButtons: function()
+	{
+		if (ISYPanel.PanelId === null) {
+			ISYPanel.showError('MISSINGPANELID');
+			return -1;
+		}
+		
+		var cuts = ISYPanel.CONFIG.Panels[ISYPanel.PanelId].shortcuts;
+		
+		if (cuts.length <= 0) { return -1 }
+		
+		for (var i in cuts) {
+			var cut = cuts[i];
+			
+			var btn = document.createElement('button');
+			btn.setAttribute('class', 'shortcuts');
+			btn.setAttribute('id', 'btnShort' + i);
+			
+			var txt = document.createTextNode(cut.name);
+			btn.appendChild(txt);
+			
+			var url = cut.addr;
+			
+			$(btn).bind("click", {url: url}, function(event) {
+					ISYPanel.frameNavigate(event.data.url);
+				}
+			);
+			
+			var boxMenuButtons = document.getElementById('boxMenuButtons');
+			boxMenuButtons.appendChild(btn); btn = null;
+		}
+		
+		return 0;
+	},
+	
+	/**
+	* Load url in an iframe
+	*/
+	frameNavigate: function(url)
+	{
+		var ctrlContainer = document.getElementById('ctrlContainer');
+		if (!ctrlContainer) { return -1 }
+		
+		// clear contents of ctrlContainer
+		ctrlContainer.innerHTML = "";
+		
+		// create IFRAME element and set its dimensions
+		var ifr = document.createElement('IFRAME');
+		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
+		var ifrHeight = ctrlContainer.offsetHeight < 600 ? 600 : ctrlContainer.offsetHeight;
+		ifr.setAttribute('height', ifrHeight);
+		
+		// set SRC of IFRAME to an url
+		ISYPanel.log('Navigating to: ' + url);
+		ifr.setAttribute('src', url);
+		
+		ctrlContainer.appendChild(ifr); ifr = null;
+		ctrlContainer.style.backgroundColor = 'white';
+		return 0;	
 	},
 	
 	/**
@@ -502,15 +567,15 @@ var ISYPanel = {
 	*/
 	showWeather: function()
 	{
-		
-		var zip = ISYPanel.CONFIG.ZipCode;
-		if (! zip) {
-		    showError('MISSINGZIP');
+		if (undefined == ISYPanel.CONFIG.ZipCode) {
+		    ISYPanel.showError('ZIPMISSING');
+		    $('#boxClimate').hide();
 		    return -1;
 		}
 		
 		//TODO: verify that Climate module is installed and enabled
 		//
+		var zip = ISYPanel.CONFIG.ZipCode;
 		
 		var url = (ISYPanel.CONFIG.IsOffline) ? './climate.xml' : '/rest/climate';
 		
@@ -522,12 +587,13 @@ var ISYPanel = {
 			url: url,
 			dataType: 'xml',
 			error: function(XMLHttpRequest, textStatus, errorThrown){
+				$("div#boxClimate").hide();
 				ISYPanel.log(textStatus + ' loading: ' + url);
 				ISYPanel.showError('CLIMATENOTLOADED');
 			},
 			success: function(data){
 				ISYPanel.updateClimateDisplay(data);
-				setTimeout("ISYPanel.showWeather()", 3500000);
+				setTimeout("ISYPanel.showWeather()", 90000);
 			}
 		});
 		return 0;
@@ -544,9 +610,9 @@ var ISYPanel = {
 		if ($(data).find('climate').size())
 		{
 			var climate = $(data).find('climate');
-		        var tempCurrent = $(climate).find('Temperature').text();
-		        var tempHigh = $(climate).find('Temperature_High').text();
-		        var tempLow =  $(climate).find('Temperature_Low').text();
+		        var tempCurrent = $(climate).find('Temperature').text().replace(' ', '&deg;');
+		        var tempHigh = $(climate).find('Temperature_High').text().replace(' ', '&deg;');
+		        var tempLow =  $(climate).find('Temperature_Low').text().replace(' ', '&deg;');
                 
 			//TODO: validation and clean up
 		        if (tempCurrent) $('div#boxTempCurrent').html(tempCurrent);
@@ -562,32 +628,20 @@ var ISYPanel = {
 	*/
 	loadWeather: function()
 	{
-		var zip = ISYPanel.CONFIG.ZipCode;
-		if (! zip) {
-		    showError('MISSINGZIP');
+		if (undefined == ISYPanel.CONFIG.ZipCode) {
+		    ISYPanel.showError('ZIPMISSING');
+		    $("div#boxClimate").hide();
 		    return -1;
 		}
 		
+		var zip = ISYPanel.CONFIG.ZipCode;
+
 		ISYPanel.log('Loading weather map for Zip code: ' + zip);
 		//var url = 'http://www.wund.com/cgi-bin/findweather/getForecast?query=' + zip;
 		var url = 'http://www.wunderground.com/cgi-bin/findweather/getForecast?brand=wxmap&query=' + zip;
 		
-		// Load weather forecast to an iframe
-		var ctrlContainer = document.getElementById('ctrlContainer');
-		if (!ctrlContainer) { return -1 }
-		// clear contents of ctrlContainer
-		ctrlContainer.innerHTML = "";
-		// create IFRAME element
-		var ifr = document.createElement('IFRAME');
-		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
-		var ifrHeight = ctrlContainer.offsetHeight < 400 ? 600 : ctrlContainer.offsetHeight;
-		ifr.setAttribute('height', ifrHeight);
-		// set SRC of IFRAME to url
-		ifr.setAttribute('src', url);
-		ctrlContainer.appendChild(ifr); ifr = null;
-		ctrlContainer.style.backgroundColor = 'white';
+		ISYPanel.frameNavigate(url);
 		return 0;
-	    
 	},
 
 	/**
@@ -612,21 +666,9 @@ var ISYPanel = {
 	loadDevices: function()
 	{
 		// Load /devices to an iframe
-		var ctrlContainer = document.getElementById('ctrlContainer');
-		if (!ctrlContainer) { return -1 }
-		// clear contents of ctrlContainer
-		ctrlContainer.innerHTML = "";
-		
+		var url = '/devices';
 		ISYPanel.log('Loading Devices screen...');
-		// create IFRAME element
-		var ifr = document.createElement('IFRAME');
-		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
-		var ifrHeight = ctrlContainer.offsetHeight < 400 ? 600 : ctrlContainer.offsetHeight;
-		ifr.setAttribute('height', ifrHeight);
-		// set SRC of IFRAME to /devices
-		ifr.setAttribute('src', '/devices');
-		ctrlContainer.appendChild(ifr); ifr = null;
-		ctrlContainer.style.backgroundColor = 'white';
+		ISYPanel.frameNavigate(url);
 		return 0;
 	},
 	
@@ -635,22 +677,9 @@ var ISYPanel = {
 	*/
 	loadScenes: function()
 	{
-		// Load /scenes to an iframe
-		var ctrlContainer = document.getElementById('ctrlContainer');
-		if (!ctrlContainer) { return -1 }
-		// clear contents of ctrlContainer
-		ctrlContainer.innerHTML = "";
-		
+		var url = '/scenes';
 		ISYPanel.log('Loading Scenes screen...');
-		// create IFRAME element
-		var ifr = document.createElement('IFRAME');
-		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
-		var ifrHeight = ctrlContainer.offsetHeight < 400 ? 600 : ctrlContainer.offsetHeight;
-		ifr.setAttribute('height', ifrHeight);
-		// set SRC of IFRAME to /scenes
-		ifr.setAttribute('src', '/scenes');
-		ctrlContainer.appendChild(ifr); ifr = null;
-		ctrlContainer.style.backgroundColor = 'white';
+		ISYPanel.frameNavigate(url);
 		return 0;
 	},
 	
@@ -660,21 +689,9 @@ var ISYPanel = {
 	loadPgms: function()
 	{
 		// Load /pgms to an iframe
-		var ctrlContainer = document.getElementById('ctrlContainer');
-		if (!ctrlContainer) { return -1	}
-		// clear contents of ctrlContainer
-		ctrlContainer.innerHTML = "";
-		
+		var url = '/pgms';
 		ISYPanel.log('Loading Programs screen...');
-		// create IFRAME element
-		var ifr = document.createElement('IFRAME');
-		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
-		var ifrHeight = ctrlContainer.offsetHeight < 400 ? 600 : ctrlContainer.offsetHeight;
-		ifr.setAttribute('height', ifrHeight);
-		// set SRC of IFRAME to /pgms
-		ifr.setAttribute('src', '/pgms');
-		ctrlContainer.appendChild(ifr); ifr = null;
-		ctrlContainer.style.backgroundColor = 'white';
+		ISYPanel.frameNavigate(url);
 		return 0;
 	},
 	
@@ -711,25 +728,29 @@ var ISYPanel = {
 			case 'CONFIGISBROKEN':
 				msg += 'Config.js is incomplete or contains errors! Please check your configuration and try again.';
 				break;
-			case 'MISSINGZIP':
-				msg += 'Please specify 5-digit ZIP code in your configuration file';
+			case 'ZIPMISSING':
+				msg += 'Please specify the 5-digit ZIP code in your configuration file.';
 				break;
 			case 'CLIMATENOTLOADED':
 				msg += 'Unable to read Weather data!';
 				break;
 			default:
 				msg += 'Unknown error';
+				break;
 		}
 		
 		if ('file:' == window.location.protocol) {
 			msg += "\n\nNote: ISY Panel should be served from the web server!\nIt won't work with file:// protocol due to JS security restrictions.";
 		}
 		
-		alert(msg);
+		//alert(msg);
 		
 		ISYPanel.enableLog();
 		ISYPanel.log(msg);
 	}
 };
 
-ISYPanel.LoadConfig();
+$(document).ready(function() {
+	ISYPanel.LoadConfig();	
+});
+

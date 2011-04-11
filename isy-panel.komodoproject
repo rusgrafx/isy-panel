@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Komodo Project File - DO NOT EDIT -->
 <project id="5a14d65a-4517-4fde-b483-933fe12c71e6" kpf_version="5" name="isy-panel.komodoproject">
-<file id="43247798-ee86-40ea-beae-4f583dd3bb2a" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="panel.css" url="panel.css">
-</file>
-<file id="4c1bad25-97e1-4b23-a9fb-10ab1c7f51e9" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="panel.htm" url="panel.htm">
-</file>
+<folder id="8107303c-6263-1241-8bff-f2550ce3ca69" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="core">
+</folder>
 <file id="826500e1-2a42-4010-8e23-a54761f8cfd5" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="config.js" url="config.js">
 </file>
 <folder id="8ba11c77-8405-46d4-9b2b-69acffc02b27" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="support">
@@ -13,7 +11,11 @@
 </folder>
 <folder id="9c188fbd-a9a1-4471-a0c2-cd59d26696b0" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="Panel02">
 </folder>
-<file id="dbed58f5-6a2c-49fd-8229-bc1f31c9cb61" idref="5a14d65a-4517-4fde-b483-933fe12c71e6" name="main.js" url="main.js">
+<file id="0a7393e2-002b-ca4e-ac7c-9bf618b8c8c8" idref="8107303c-6263-1241-8bff-f2550ce3ca69" name="panel.htm" url="panel.htm">
+</file>
+<file id="d900397d-24d3-d14a-b824-fb28a10cad80" idref="8107303c-6263-1241-8bff-f2550ce3ca69" name="main.js" url="main.js">
+</file>
+<file id="ff35b4f6-5bf1-0f43-b121-3e11307b9d6b" idref="8107303c-6263-1241-8bff-f2550ce3ca69" name="panel.css" url="panel.css">
 </file>
 <file id="2f334273-0be0-4397-a75e-2f274b6bb503" idref="8ba11c77-8405-46d4-9b2b-69acffc02b27" name="Readme.txt" url="Readme.txt">
 </file>

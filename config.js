@@ -56,6 +56,12 @@
 			"admin": true,
 			"name": "Mi Casa",
 			"css": "./style01.css",
+			"shortcuts":
+			[
+				{ "name": "PicasaWeb", "addr": "https://picasaweb.google.com/lh/featured?feat=featured_all#slideshow" },
+				{ "name": "GReader", "addr": "http://www.google.com/reader/play/?hl=en#item/new/0" },
+				{ "name": "Pandora", "addr": "http://pandora.com" }
+			],
 			"areas":
 			[
 				{

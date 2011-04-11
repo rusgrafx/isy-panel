@@ -15,6 +15,9 @@ BUTTON {
 	margin: 4px;
 	/*background-color: black;*/
 }
+#frameMenu BUTTON {
+	margin: 2px;
+}
 #frameControl BUTTON {
 	width: 4em;
 	height: 3em;
