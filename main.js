@@ -1,3 +1,24 @@
+/*
+ * ISY Panel - web interface for ISY-99i home automation controller
+ * http://code.google.com/p/isy-panel/
+ *
+ * Copyright 2011, Ruslan Ulanov
+ *
+ * This file is part of ISY Panel.
+ *
+ * ISY Panel is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation, either version 3
+ * of the License, or (at your option) any later version.
+ *
+ * ISY Panel is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with ISY Panel. If not, see <http://www.gnu.org/licenses/>.
+ */
 var ISYPanel = {
 	
 	Initialized: false,
@@ -43,7 +64,7 @@ var ISYPanel = {
 		
 		// Hide status/log area
 		if (! ISYPanel.CONFIG.ShowLog) {
-			document.getElementById('frameStatus').style.display = 'none';
+			$('#frameStatus').hide();
 		}
 		
 		// Enable logging
@@ -57,10 +78,20 @@ var ISYPanel = {
 			ISYPanel.log('Warning: ISYPanel is running in Offline mode! Set CONFIG.IsOffline to false before uploading to ISY.');
 		}
 		
-		// Set title of the Home button
-		if (document.getElementById('btnHome')) {
-			document.getElementById('btnHome').innerText = ISYPanel.CONFIG.Name;
+		// Set caption of the Home button
+		if (ISYPanel.CONFIG.Name) {
+			$('#btnHome').text(ISYPanel.CONFIG.Name);
 		}
+		
+		// Assign handlers to default menu buttons
+		$('#btnHome').bind('click', ISYPanel.loadControls);
+		$('#btnWeather').bind('click', ISYPanel.loadWeather);
+		$('#btnDevices').bind('click', ISYPanel.loadDevices);
+		$('#btnScenes').bind('click', ISYPanel.loadScenes);
+		$('#btnPrograms').bind('click', ISYPanel.loadPgms);
+		$('#btnClearLog').bind('click', ISYPanel.ClearLog);
+		$('#btnExpandLog').bind('click', ISYPanel.ExpandLog);
+		$('#chkPollCameras').bind('click', ISYPanel.chkPollCameras_CheckEventHandler);
 		
 		// Get Id for current panel
 		var ip = ISYPanel.getIP();
@@ -103,10 +134,11 @@ var ISYPanel = {
 	getPanelId: function(ip)
 	{
 		var panels = ISYPanel.CONFIG.Panels;
+		var panelsLength = panels.length;
 		
-		if (panels.length <= 0) return -1;
+		if (panelsLength <= 0) return -1;
 		
-		for (var i=0, ii=panels.length; i<ii; i++)
+		for (var i=0, ii=panelsLength; i<ii; i++)
 		{
 			var addr = panels[i].addr;
 			
@@ -144,11 +176,8 @@ var ISYPanel = {
 	*/
 	log: function(msg)
 	{
-		var logChk = document.getElementById('chkEnableLog');
-		if (logChk.checked)
-		{
-			var log = document.getElementById('statusContainer');
-			log.innerHTML = ISYPanel.getTimeString() +' : '+ msg + '<br />' + log.innerHTML;
+		if ( $('#chkEnableLog').attr('checked') ) {
+			$('#statusContainer').prepend(ISYPanel.getTimeString() +' &rarr; '+ msg + '<br />');
 		}
 	},
 
@@ -157,8 +186,7 @@ var ISYPanel = {
 	*/
 	ClearLog: function()
 	{
-		var log = document.getElementById('statusContainer');
-		log.innerHTML = ISYPanel.getTimeString() +' : '+ 'Log cleared <br />';
+		$('#statusContainer').html(ISYPanel.getTimeString() +' &rarr; '+ 'Log has been cleared<br />');
 	},
 	
 	/**
@@ -166,9 +194,8 @@ var ISYPanel = {
 	*/
 	enableLog: function()
 	{
-		if (! $('#chkEnableLog').attr('checked')) {
+		if (! $('#chkEnableLog').attr('checked') ) {
 			$('#chkEnableLog').attr('checked', 'checked');
-			//document.getElementById('chkEnableLog').checked = true;
 			ISYPanel.log('Enabling log.');
 		}
 	},
@@ -178,8 +205,7 @@ var ISYPanel = {
 	*/
 	chkPollCameras_CheckEventHandler: function()
 	{
-		var cBox = document.getElementById('chkPollCameras');
-		if(cBox.checked) {
+		if ( $('#chkPollCameras').attr('checked') ) {
 			ISYPanel.log('Camera polling enabled');
 			ISYPanel.getCamImages();
 		}
@@ -194,11 +220,10 @@ var ISYPanel = {
 	*/
 	cameraPolling: function()
 	{
-		var cBox = document.getElementById('chkPollCameras');
-		var tOut = document.getElementById('selPollTimeout');
-		if(cBox.checked) {
-			ISYPanel.log('Setting camera polling interval to ' + tOut.value + ' msec');
-			setTimeout("ISYPanel.getCamImages()", tOut.value);
+		var tOut = $('#selPollTimeout').attr('value');
+		if ($('#chkPollCameras').attr('checked')) {
+			ISYPanel.log('Setting camera polling interval to ' + tOut + ' msec.');
+			setTimeout("ISYPanel.getCamImages()", tOut);
 		}
 	},
 	
@@ -219,12 +244,7 @@ var ISYPanel = {
 		for (var i in cuts) {
 			var cut = cuts[i];
 			
-			var btn = document.createElement('button');
-			btn.setAttribute('class', 'shortcuts');
-			btn.setAttribute('id', 'btnShort' + i);
-			
-			var txt = document.createTextNode(cut.name);
-			btn.appendChild(txt);
+			var btn = $('<button id="btnShort'+ i +'" class="shotrcuts">' + cut.name + '</button>');
 			
 			var url = cut.addr;
 			
@@ -233,8 +253,7 @@ var ISYPanel = {
 				}
 			);
 			
-			var boxMenuButtons = document.getElementById('boxMenuButtons');
-			boxMenuButtons.appendChild(btn); btn = null;
+			$('#boxMenuButtons').append(btn);
 		}
 		
 		return 0;
@@ -245,24 +264,30 @@ var ISYPanel = {
 	*/
 	frameNavigate: function(url)
 	{
-		var ctrlContainer = document.getElementById('ctrlContainer');
-		if (!ctrlContainer) { return -1 }
+		if (! $('#ctrlContainer') || !url) { return -1 }
 		
 		// clear contents of ctrlContainer
-		ctrlContainer.innerHTML = "";
+		$('#ctrlContainer').html('');
 		
 		// create IFRAME element and set its dimensions
-		var ifr = document.createElement('IFRAME');
-		ifr.setAttribute('width', ctrlContainer.offsetWidth - 2);
-		var ifrHeight = ctrlContainer.offsetHeight < 600 ? 600 : ctrlContainer.offsetHeight;
-		ifr.setAttribute('height', ifrHeight);
+		var frameWidth = ctrlContainer.offsetWidth - 2;
+		var frameHeight = ctrlContainer.offsetHeight < 600 ? 600 : ctrlContainer.offsetHeight;
+		
+		//var ifr = document.createElement('IFRAME');
+		//ifr.setAttribute('width', frameWidth);
+		//ifr.setAttribute('height', frameHeight);
+		var ifr = $('<iframe width="' +frameWidth+ '" height="' +frameHeight+ '" src="' +url+ '" />');
 		
 		// set SRC of IFRAME to an url
 		ISYPanel.log('Navigating to: ' + url);
-		ifr.setAttribute('src', url);
+		//ifr.setAttribute('src', url);
 		
-		ctrlContainer.appendChild(ifr); ifr = null;
-		ctrlContainer.style.backgroundColor = 'white';
+		$('#ctrlContainer').append(ifr);
+		
+		/* provide some background for default ISY pages (Devices/Scenes/Programs) */
+		if (url.charAt(0) === '/') {
+			$('#ctrlContainer').css('background-color', 'whitesmoke');
+		}
 		return 0;	
 	},
 	
@@ -277,7 +302,7 @@ var ISYPanel = {
 			return -1;
 		}
 		
-		if (! document.getElementById('chkPollCameras').checked) { return -1 }
+		if (! $('#chkPollCameras').attr('checked') ) { return -1 }
 		
 		ISYPanel.log('Updating camera images...');
 		
@@ -313,7 +338,7 @@ var ISYPanel = {
 				lbl.appendChild(txt);
 				box.appendChild(lbl);
 				
-				document.getElementById('camContainer').appendChild(box);
+				$('#camContainer').append(box);
 				//document.getElementById('frameCameras').appendChild(img);
 			}
 			// assign SRC to imgUrl
@@ -368,21 +393,15 @@ var ISYPanel = {
 		// apply stylesheet
 		var css = ISYPanel.CONFIG.Panels[ISYPanel.PanelId].css;
 		if (css) {
-			var cssref=document.createElement('link');
-			cssref.setAttribute('rel', 'stylesheet');
-			cssref.setAttribute('type', 'text/css');
-			cssref.setAttribute('href', css);
-			document.getElementsByTagName("head")[0].appendChild(cssref);
+			$('<link rel="stylesheet" type="text/css" href="' + css + '" id="customStyle" />').insertAfter('head #defaultStyle');
 		}
 		
 		// hide webcams pane if no webcams defined for this panel
 		var webcams = ISYPanel.CONFIG.Panels[ISYPanel.PanelId].webcams;
 		if (!webcams) {
-			var frameCameras = document.getElementById('frameCameras');
-			frameCameras.style.display = 'none';
+			$('#frameCameras').hide();
 		} else {
-			var frameControl = document.getElementById('frameControl');
-			frameControl.style.marginRight = '330px';
+			$('#frameControl').css('marginRight', '330px');
 			ISYPanel.getCamImages();
 		}
 		
@@ -390,14 +409,9 @@ var ISYPanel = {
 		var admin = ISYPanel.CONFIG.Panels[ISYPanel.PanelId].admin;
 		if (!admin)
 		{
-			var btnDevices = document.getElementById('btnDevices');
-			btnDevices.style.display = 'none';
-			
-			var btnScenes = document.getElementById('btnScenes');
-			btnScenes.style.display = 'none';
-			
-			var btnPrograms = document.getElementById('btnPrograms');
-			btnPrograms.style.display = 'none';
+			$('#btnDevices').hide();
+			$('#btnScenes').hide();
+			$('#btnPrograms').hide();
 		}
 		
 		//foreach AREA in the panel generate controls
@@ -610,14 +624,14 @@ var ISYPanel = {
 		if ($(data).find('climate').size())
 		{
 			var climate = $(data).find('climate');
-		        var tempCurrent = $(climate).find('Temperature').text().replace(' ', '&deg;');
+		        var tempCurrent = $(climate).find('Temperature').text().replace(' F', '&deg;');
 		        var tempHigh = $(climate).find('Temperature_High').text().replace(' ', '&deg;');
 		        var tempLow =  $(climate).find('Temperature_Low').text().replace(' ', '&deg;');
                 
 			//TODO: validation and clean up
 		        if (tempCurrent) $('div#boxTempCurrent').html(tempCurrent);
-		        if (tempHigh) $('div#boxTempHigh').html(tempHigh);
-		        if (tempLow) $('div#boxTempLow').html(tempLow);
+		        if (tempHigh) $('div#boxTempHigh').html('High: ' + tempHigh);
+		        if (tempLow) $('div#boxTempLow').html('Low: ' + tempLow);
 			return 0;
 		}
 		return -1;

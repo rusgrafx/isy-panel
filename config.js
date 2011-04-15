@@ -12,7 +12,7 @@
 	"Panels": 
 	[
 		{ 
-			"addr":  "#kitchen,192.168.20.27",
+			"addr":  "#kitchen",
 			"admin": false,
 			"name":  "Kitchen",
 			"css": "./style02.css",
@@ -20,6 +20,12 @@
 			[
 				{ "name": "Family Room", "addr": "http://192.168.20.4", "imgUrl": "/SnapshotJPEG?Resolution=320x240&Quality=Clarity" },
 				{ "name": "Guest Room", "addr": "http://192.168.20.2:8002", "imgUrl": "/SnapshotJPEG?Resolution=320x240&Quality=Clarity" }
+			],
+			"shortcuts":
+			[
+				{ "name": "Pandora", "addr": "http://pandora.com" },
+				{ "name": "Recipes", "addr": "http://mobile.allrecipes.com/Search/Recipes.aspx" },
+				{ "name": "WholeFoods Recipes", "addr": "http://m.wholefoodsmarket.com/recipes/"}
 			],
 			"areas":
 			[

@@ -15,8 +15,8 @@ BUTTON {
 	margin: 4px;
 	/*background-color: black;*/
 }
-#frameMenu BUTTON {
-	margin: 2px;
+#frameMenu #boxMenuButtons BUTTON {
+	margin-right: 4px;
 }
 #frameControl BUTTON {
 	width: 4em;
@@ -25,4 +25,7 @@ BUTTON {
 	color: silver;
 	border-radius: 1em;
 	margin: 2px;
+}
+.shortcuts {
+	margin-right: 4px;
 }
