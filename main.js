@@ -265,29 +265,34 @@ var ISYPanel = {
 	frameNavigate: function(url)
 	{
 		if (! $('#ctrlContainer') || !url) { return -1 }
-		
-		// clear contents of ctrlContainer
-		$('#ctrlContainer').html('');
-		
-		// create IFRAME element and set its dimensions
-		var frameWidth = ctrlContainer.offsetWidth - 2;
-		var frameHeight = ctrlContainer.offsetHeight < 600 ? 600 : ctrlContainer.offsetHeight;
-		
-		//var ifr = document.createElement('IFRAME');
-		//ifr.setAttribute('width', frameWidth);
-		//ifr.setAttribute('height', frameHeight);
-		var ifr = $('<iframe width="' +frameWidth+ '" height="' +frameHeight+ '" src="' +url+ '" />');
-		
+
 		// set SRC of IFRAME to an url
 		ISYPanel.log('Navigating to: ' + url);
-		//ifr.setAttribute('src', url);
 		
-		$('#ctrlContainer').append(ifr);
+		// create IFRAME element and set its dimensions
+		if ( $('#mainFrame').length === 0 ) {
+			// clear contents of ctrlContainer
+			//$('#ctrlContainer').html('');
+
+			var frameWidth = ctrlContainer.offsetWidth - 10;
+			var frameHeight = ctrlContainer.offsetHeight < 600 ? 600 : ctrlContainer.offsetHeight;
+			var ifr = $('<iframe id="mainFrame" width="' +frameWidth+ '" height="' +frameHeight+ '" src="' +url+ '" />');
+	
+			$('#ctrlContainer').fadeOut('fast').html('');
+			$('#ctrlContainer').append(ifr);
+			$('#ctrlContainer').fadeIn('slow');
+		}
+		else
+		{
+			$('#ctrlContainer').fadeOut('fast');
+			$('#mainFrame').attr('src', url);
+			$('#ctrlContainer').fadeIn('slow');
+		}
 		
 		/* provide some background for default ISY pages (Devices/Scenes/Programs) */
-		if (url.charAt(0) === '/') {
+		//if (url.charAt(0) === '/') {
 			$('#ctrlContainer').css('background-color', 'whitesmoke');
-		}
+		//}
 		return 0;	
 	},
 	
@@ -386,9 +391,11 @@ var ISYPanel = {
 			return -1;
 		}
 		
-		// get the container
-		var ctrlContainer = document.getElementById('ctrlContainer');
-		if (!ctrlContainer) { return -1 }
+		// check the container
+		if ( $('#ctrlContainer').length === 0 ) { return -1 }
+
+		// clear contents of ctrlContainer
+		$('#ctrlContainer').fadeOut('fast').html('');
 		
 		// apply stylesheet
 		var css = ISYPanel.CONFIG.Panels[ISYPanel.PanelId].css;
@@ -487,8 +494,9 @@ var ISYPanel = {
 			}
 			
 			fld.appendChild(tbl);
-			ctrlContainer.appendChild(fld);
+			$('#ctrlContainer').append(fld);
 		}
+		$('#ctrlContainer').fadeIn('slow');
 		ISYPanel.log('Controls generated');
 		return 0;
 	},
@@ -565,8 +573,8 @@ var ISYPanel = {
 			
 			if (!ISYPanel.CONFIG.IsOffline) {
 				var jqxhr = $.get(action)
-				.success(function() { ISYPanel.log('Success'); })
-				.error(function() { ISYPanel.log('Error returned'); });
+				.success(function() { ISYPanel.log('Program was successfully executed.'); })
+				.error(function() { ISYPanel.log('Program execution failed!'); });
 				//.complete(function() { ISYPanel.log('Complete'); });
 			} else {
 				ISYPanel.log('action: ' + action);
@@ -627,11 +635,25 @@ var ISYPanel = {
 		        var tempCurrent = $(climate).find('Temperature').text().replace(' F', '&deg;');
 		        var tempHigh = $(climate).find('Temperature_High').text().replace(' ', '&deg;');
 		        var tempLow =  $(climate).find('Temperature_Low').text().replace(' ', '&deg;');
+			
+			var tempCurrentContainer = $('#boxTempCurrent');
+			var tempHighContainer = $('#boxTempHigh');
+			var tempLowContainer = $('#boxTempLow');
                 
-			//TODO: validation and clean up
-		        if (tempCurrent) $('div#boxTempCurrent').html(tempCurrent);
-		        if (tempHigh) $('div#boxTempHigh').html('High: ' + tempHigh);
-		        if (tempLow) $('div#boxTempLow').html('Low: ' + tempLow);
+			if ( tempCurrentContainer.length === 0 ) {
+				// generate container for Climate module
+				var climateContainer = $('<div id="boxClimate"></div>');
+				tempCurrentContainer = $('<div id="boxTempCurrent"></div>');
+				tempHighContainer = $('<div id="boxTempHigh"></div>');
+				tempLowContainer = $('<div id="boxTempLow"></div>');
+				
+				$(climateContainer).append(tempCurrentContainer).append(tempHighContainer).append(tempLowContainer);
+				$('#wrapper').append(climateContainer);
+			}
+			
+		        if (tempCurrent) $(tempCurrentContainer).html(tempCurrent);
+		        if (tempHigh) $(tempHighContainer).html('High: ' + tempHigh);
+		        if (tempLow) $(tempLowContainer).html('Low: ' + tempLow);
 			return 0;
 		}
 		return -1;
@@ -663,14 +685,8 @@ var ISYPanel = {
 	*/
 	loadControls: function()
 	{
-		// Load controls to ctrlContainer
-		var ctrlContainer = document.getElementById('ctrlContainer');
-		if (!ctrlContainer) { return -1	}
-		// clear contents of ctrlContainer
-		ctrlContainer.innerHTML = "";
-		// generate controls
 		ISYPanel.generateControls();
-		ctrlContainer.style.backgroundColor = 'transparent';
+		$('#ctrlContainer').css('background-color','transparent');
 		return 0;
 	},
 	
@@ -679,7 +695,6 @@ var ISYPanel = {
 	*/
 	loadDevices: function()
 	{
-		// Load /devices to an iframe
 		var url = '/devices';
 		ISYPanel.log('Loading Devices screen...');
 		ISYPanel.frameNavigate(url);
@@ -702,7 +717,6 @@ var ISYPanel = {
 	*/
 	loadPgms: function()
 	{
-		// Load /pgms to an iframe
 		var url = '/pgms';
 		ISYPanel.log('Loading Programs screen...');
 		ISYPanel.frameNavigate(url);

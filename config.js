@@ -1,9 +1,9 @@
 {
 	"IsOffline": false,
 
-	"ShowLog": true,
+	"ShowLog": false,
 
-	"EnableLog": true,
+	"EnableLog": false,
 
 	"Name": "My Home", 
 
@@ -24,8 +24,8 @@
 			"shortcuts":
 			[
 				{ "name": "Pandora", "addr": "http://pandora.com" },
-				{ "name": "Recipes", "addr": "http://mobile.allrecipes.com/Search/Recipes.aspx" },
-				{ "name": "WholeFoods Recipes", "addr": "http://m.wholefoodsmarket.com/recipes/"}
+				{ "name": "AllRecipes", "addr": "http://mobile.allrecipes.com/Search/Recipes.aspx" },
+				{ "name": "WholeFoods", "addr": "http://m.wholefoodsmarket.com/recipes/"}
 			],
 			"areas":
 			[

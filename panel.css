@@ -42,49 +42,47 @@ HTML, BODY, DIV, IFRAME, LABEL, SELECT, OPTION {
 }
 /* CLIMATE */
 #boxClimate {
-	position: relative;
-	float: right;
-	width: 174px;
-	height: 43px;
+	position: absolute;
+	width: auto;
 	right: 0px;
-	top: 0px;
-	background-color: transparent;
-	opacity: 0.5;
+	top: -6px;
+	opacity: 0.6;
 	padding: 3px;
-	/*border: solid 2px silver;*/
-	margin-top: -8px;
+	background-color: transparent;
 }
 #boxTempCurrent {
+	position: relative;
 	color: silver;
 	position: relative;
 	font-size: 2.4em;
-	font-family: sans-serif;
-	font-weight: bold;
+	font-family: Georgia, sans-serif;
+	/*font-weight: bold;*/
 	text-shadow: 2px 2px 2px black;
+	margin-right: 6px;
+	/*background: blue;*/
 }
 #boxTempHigh {
-	position: absolute;
-	top: 1px;
+	position: relative;
+	top: 0px;
 	right: 0px;
-	font-family: sans-serif;
-	margin: 4px;
-	margin-bottom: 0;
-	padding: 2px;
+	/*margin-top: 6px;*/
+	font-family: Georgia, sans-serif;
+	font-size: small;
 	color: silver;
 	font-weight: bold;
-	text-shadow: 1px 1px 1px #f00;
+	text-shadow: 1px 1px 1px #d00;
+	/*background: gold;*/
 }
 #boxTempLow {
-	position: absolute;
+	position: relative;
 	bottom: 0px;
 	right: 0px;
-	font-family: sans-serif;
-	margin: 4px;
-	margin-top: 0;
-	padding: 2px;
+	font-family: Georgia, sans-serif;
+	font-size: small;
 	color: silver;
 	font-weight: bold;
-	text-shadow: 1px 1px 1px #00f;
+	text-shadow: 1px 1px 1px #00d;
+	/*background: yellow;*/
 }
 
 /* CAMERA */
