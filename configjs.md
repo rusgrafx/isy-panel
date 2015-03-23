@@ -54,13 +54,13 @@ All fields are **required**, unless specifically mentioned otherwise.
 > > CSS file for this panel
 
   * `webcams (array) optional`
-> > An array of web/ip camera configurations ([see below for details](configjs.md#WEBCAMS_CONFIGURATION))
+> > An array of web/ip camera configurations ([see below for details](configjs.md#webcams-configuration))
 
   * `shortcuts (array) optional`
-> > An array of values that will create buttons in the menu to navigate to your favorite websites ([see below for details](configjs.md#SHORTCUTS_CONFIGURATION))
+> > An array of values that will create buttons in the menu to navigate to your favorite websites ([see below for details](configjs.md#shortcuts-configuration))
 
   * `areas (array)`
-> > An array of locations such as rooms or other logical groups of controls  ([see below for details](configjs.md#AREAS_CONFIGURATION)).
+> > An array of locations such as rooms or other logical groups of controls  ([see below for details](configjs.md#areas-configuration)).
 
 
 #### AREAS CONFIGURATION ####
