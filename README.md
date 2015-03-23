@@ -16,7 +16,7 @@ The idea behind this project is to create a fairly flexible and expandable, loca
 
 ## A BIT OF THE BACKGROUND
 
-A company named [http://universal-devices.com Universal Devices] manufacturers tiny, but smart, home automation controller called ISY-99i. The "i" in its name stands for [http://smarthome.com INSTEON] which is a dual-mesh (Power line + RF) home automation protocol which allows to remotely control devices and lights either plugged or wired in to control modules, switches, dimmers, etc. 
+A company named [Universal Devices] (http://universal-devices.com) manufacturers tiny, but smart, home automation controller called ISY-99i. The "i" in its name stands for [INSTEON] (http://www.insteon.com) which is a dual-mesh (Power line + RF) home automation protocol which allows to remotely control devices and lights either plugged or wired in to control modules, switches, dimmers, etc. 
 
 ISY-99i (later we will just call it "ISY") allows you to monitor status (ON/OFF state, brightness, etc.) of all devices in the home, as well as create advanced algorithms based on events, time of day, sensors, etc., to automatically control INSTEON modules. For example, ISY can automatically turn on the lamp when you enter a dark room, or it could turn off the porch lights at dawn, saving you money. The actual scenarios could be much more elaborate, though.
 
